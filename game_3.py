@@ -72,8 +72,8 @@ while play:
 
     chg_drct()
 
-    if (head.x > food.x - food.side / 2 and None):
-        food = Food(SNAKE_WIDTH, "dsgvs")
+    if food.side / 2 + food.x > head.x > food.x - food.side / 2 and food.side / 2 + food.y > head.y > food.y - food.side / 2:
+        food = Food(SNAKE_WIDTH, "apple")
 
     draw.rect(screen, (11, 102, 35), LAND)
     food.appearance()
