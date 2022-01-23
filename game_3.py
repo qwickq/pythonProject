@@ -2,12 +2,10 @@ from pygame import *
 from random import randint as rnd
 
 # Константы для игры
-START_X = rnd(0, 1500)
-START_Y = rnd(0, 1000)
 SCREEN_LENGTH = 1920  # Длина экрана
-SCREEN_WIDTH = 1000  # Ширина экрана
-SNAKE_WIDTH = 25  # Ширина змеи
-SNAKE_HEIGHT = 25  # Высота змеи
+SCREEN_WIDTH = 1020  # Ширина экрана
+SNAKE_LENGTH = 25  # Длина змеи
+SNAKE_WIDTH = 20  # Ширина змеи
 LAND = Rect(0, 0, SCREEN_LENGTH, SCREEN_WIDTH)
 SPEED = 2.5  # Скорости змеи
 # Начальная прорисовка игры, создание поля
@@ -17,7 +15,6 @@ screen = display.set_mode([SCREEN_LENGTH, SCREEN_WIDTH])
 clock = time.Clock()
 
 # Глобальные переменные
-head = Rect(START_X, START_Y, SNAKE_WIDTH, SNAKE_HEIGHT)
 change_x = SPEED
 change_y = 0
 
@@ -59,13 +56,13 @@ def chg_drct() -> None:
         change_y = 0
 
 
-class Snake:  # Класс ,,Змея''
-    def __init__(self, length, width, speed):
+class BodySnake:  # Класс ,,Змея''
+    def __init__(self, length, width, speed, x, y):
         self.length = length
         self.width = width
         self.speed = speed
-        self.x = rnd(4 * length, int(SCREEN_LENGTH * 0.95))
-        self.y = rnd(width / 2, SCREEN_WIDTH - width / 2)
+        self.x = x
+        self.y = y
 
     def appearance(self):
         draw.rect(screen, "#ff00ff", Rect(self.x, self.y, self.length, self.width))
@@ -76,24 +73,35 @@ class Snake:  # Класс ,,Змея''
         self.y += change_y
 
 
-snake = Snake(25, 20, SPEED)
+head_snake = BodySnake(SNAKE_LENGTH, SNAKE_WIDTH, SPEED, rnd(4 * SNAKE_LENGTH, int(SCREEN_LENGTH * 0.95)), rnd(SNAKE_WIDTH // 2, SCREEN_WIDTH - SNAKE_WIDTH // 2))
+snake = [head_snake, BodySnake(SNAKE_LENGTH, SNAKE_WIDTH, SPEED, head_snake.x - SNAKE_LENGTH, head_snake.y),
+         BodySnake(SNAKE_LENGTH, SNAKE_WIDTH, SPEED, head_snake.x - SNAKE_LENGTH * 2, head_snake.y)]
+
+
+def grow():
+    snake.append(BodySnake(25, 10, SPEED, snake[-1].x - snake[-1].length, snake[-1].y))
+
 
 play = True
 while play:
     for x in event.get():
         if x.type == QUIT:
             play = False
-    if snake.x + snake.length // 2 > SCREEN_LENGTH or snake.y + snake.width // 2 > SCREEN_WIDTH or snake.x - snake.length // 2 < 0 or snake.y - snake.width // 2 < 0:
+
+    # выход за пределы экрана
+    if snake[0].x + snake[0].length // 2 > SCREEN_LENGTH or snake[0].y + snake[0].width // 2 > SCREEN_WIDTH or snake[0].x - snake[0].length // 2 < 0 or snake[0].y - snake[0].width // 2 < 0:
         play = False
 
     chg_drct()
 
-    if food.side / 2 + food.x > snake.x > food.x - food.side / 2 and food.side / 2 + food.y > snake.y > food.y - food.side / 2:
-        food = Food(SNAKE_WIDTH, "apple")
+    if food.side / 2 + food.x > snake[0].x > food.x - food.side / 2 and food.side / 2 + food.y > snake[0].y > food.y - food.side / 2:
+        food = Food(SNAKE_LENGTH, "apple")
+        grow()
 
     draw.rect(screen, (11, 102, 35), LAND)
     food.appearance()
-    snake.appearance()
-    snake.move()
+    for i in range(len(snake)):
+        snake[i].appearance()
+        snake[i].move()
     display.update()
     clock.tick(75)
