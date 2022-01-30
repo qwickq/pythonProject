@@ -1,3 +1,5 @@
+import time
+
 from pygame import *
 from random import randint as rnd
 
@@ -73,13 +75,22 @@ class BodySnake:  # Класс ,,Змея''
         self.y += change_y
 
 
-head_snake = BodySnake(SNAKE_LENGTH, SNAKE_WIDTH, SPEED, rnd(4 * SNAKE_LENGTH, int(SCREEN_LENGTH * 0.95)), rnd(SNAKE_WIDTH // 2, SCREEN_WIDTH - SNAKE_WIDTH // 2))
+# голова змеи
+head_snake = BodySnake(SNAKE_LENGTH, SNAKE_WIDTH, SPEED, rnd(4 * SNAKE_LENGTH, int(SCREEN_LENGTH * 0.95)),
+                       rnd(SNAKE_WIDTH // 2, SCREEN_WIDTH - SNAKE_WIDTH // 2))
+
 snake = [head_snake, BodySnake(SNAKE_LENGTH, SNAKE_WIDTH, SPEED, head_snake.x - SNAKE_LENGTH, head_snake.y),
          BodySnake(SNAKE_LENGTH, SNAKE_WIDTH, SPEED, head_snake.x - SNAKE_LENGTH * 2, head_snake.y)]
 
 
 def grow():
-    snake.append(BodySnake(25, 10, SPEED, snake[-1].x - snake[-1].length, snake[-1].y))
+    """рост змеи"""
+    if snake[-1].length == SNAKE_LENGTH:  # Если хвост змейки - квадрат
+        snake.append(BodySnake(SNAKE_LENGTH / 2, SNAKE_WIDTH, SPEED, snake[-1].x - snake[-1].length // 2,
+                               snake[-1].y))  # добавляем новый полуквадрат (вырастит после следующего поедания пищи)
+    else:  # если хвост змейки - полуквадрат
+        snake[-1].x -= snake[-1].length
+        snake[-1].length *= 2  # увеличиваем длину, чтобы хвост стал тоже квадратом
 
 
 play = True
@@ -89,7 +100,8 @@ while play:
             play = False
 
     # выход за пределы экрана
-    if snake[0].x + snake[0].length // 2 > SCREEN_LENGTH or snake[0].y + snake[0].width // 2 > SCREEN_WIDTH or snake[0].x - snake[0].length // 2 < 0 or snake[0].y - snake[0].width // 2 < 0:
+    if snake[0].x + snake[0].length // 2 > SCREEN_LENGTH or snake[0].y + snake[0].width // 2 > SCREEN_WIDTH \
+            or snake[0].x - snake[0].length // 2 < 0 or snake[0].y - snake[0].width // 2 < 0:
         play = False
 
     chg_drct()
