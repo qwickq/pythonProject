@@ -1,5 +1,3 @@
-import time
-
 from pygame import *
 from random import randint as rnd
 
@@ -10,18 +8,16 @@ SNAKE_LENGTH = 25  # Длина змеи
 SNAKE_WIDTH = 20  # Ширина змеи
 LAND = Rect(0, 0, SCREEN_LENGTH, SCREEN_WIDTH)
 SPEED = 2.5  # Скорости змеи
+
 # Начальная прорисовка игры, создание поля
 init()
 display.set_caption("Snake")
 screen = display.set_mode([SCREEN_LENGTH, SCREEN_WIDTH])
 clock = time.Clock()
 
-# Глобальные переменные
-change_x = SPEED
-change_y = 0
 
-
-class Food:  # Класс ,,Еда''
+class Food:  # создаём класс ,,Food" для внутриигрового увеличения змеи
+    """Класс еды"""
     def __init__(self, side, food_type):
         self.side = side
         self.x = rnd(0, 1500)
@@ -38,41 +34,57 @@ food = Food(SNAKE_WIDTH, "ewg")
 
 
 def chg_drct() -> None:
-    """ создание функции для изменения направления """
+    """ изменение направления головы змеи """
+    if snake[0].increase_reset >= snake[0].min_distance_to_rotate:
+        if key.get_pressed()[key.key_code("w")] and snake[0].direction != 's':
+            snake[0].direction = 'w'  # up
 
-    global change_x, change_y
-    if key.get_pressed()[key.key_code("w")] and not change_y:
-        change_x = 0
-        change_y = -SPEED
+        if key.get_pressed()[key.key_code("d")] and snake[0].direction != 'a':
+            snake[0].direction = 'd'  # right
 
-    if key.get_pressed()[key.key_code("a")] and not change_x:
-        change_x = -SPEED
-        change_y = 0
+        if key.get_pressed()[key.key_code("s")] and snake[0].direction != 'w':
+            snake[0].direction = 's'  # down
 
-    if key.get_pressed()[key.key_code("s")] and not change_y:
-        change_x = 0
-        change_y = SPEED
-
-    if key.get_pressed()[key.key_code("d")] and not change_x:
-        change_x = SPEED
-        change_y = 0
+        if key.get_pressed()[key.key_code("a")] and snake[0].direction != 'd':
+            snake[0].direction = 'a'  # left
+    snake[0].increase_reset += SPEED  # увеличение пройденого расстояния после поворота у ГОЛОВЫ змеи
 
 
-class BodySnake:  # Класс ,,Змея''
+class BodySnake:  # Класс ,,Змея'' # создаем класс BodySnake - тело змеи
     def __init__(self, length, width, speed, x, y):
         self.length = length
         self.width = width
         self.speed = speed
         self.x = x
         self.y = y
+        self.increase_reset = 0  # увеличивается пока не поворачиваем // актуальное пройденное расстояние после поворота
+        self.min_distance_to_rotate = self.width  # проверяет, что надо поворачиваться или (только для головы) можно поворачивать
+        self.direction = 'd'
 
     def appearance(self):
         draw.rect(screen, "#ff00ff", Rect(self.x, self.y, self.length, self.width))
 
-    def move(self):  # Создаём функцию ,,move''
-        global change_x, change_y
-        self.x += change_x
-        self.y += change_y
+    def move(self):  # Создаём функцию ,,move'' для движении змеи
+        if self.direction == 'w':
+            self.y -= SPEED
+        if self.direction == 's':
+            self.y += SPEED
+        if self.direction == 'd':
+            self.x += SPEED
+        if self.direction == 'a':
+            self.x -= SPEED
+
+
+# конкретная часть тела змеи - snake[i], i > 0, snake[i].increase_reset += что-то, increase_reset >= min_distance
+# увеличиваем i на 1 - return 0|1
+def move_body_snake(_i: int) -> int:
+    """Поворачиваем тело змеи, кроме головы"""
+    if snake[_i].increase_reset >= snake[_i].min_distance_to_rotate:
+        snake[_i].direction = snake[_i - 1].direction
+        snake[_i].increase_reset = 0
+        return 1  # Если повернули - переходим к повороту следующей части тела змеи
+    snake[_i].increase_reset += snake[_i].speed
+    return 0  # Если не повернули - остаемся на проверке этой же частой
 
 
 # голова змеи
@@ -84,7 +96,7 @@ snake = [head_snake, BodySnake(SNAKE_LENGTH, SNAKE_WIDTH, SPEED, head_snake.x - 
 
 
 def grow():
-    """рост змеи"""
+    """увеличение змеи"""
     if snake[-1].length == SNAKE_LENGTH:  # Если хвост змейки - квадрат
         snake.append(BodySnake(SNAKE_LENGTH / 2, SNAKE_WIDTH, SPEED, snake[-1].x - snake[-1].length // 2,
                                snake[-1].y))  # добавляем новый полуквадрат (вырастит после следующего поедания пищи)
@@ -93,10 +105,11 @@ def grow():
         snake[-1].length *= 2  # увеличиваем длину, чтобы хвост стал тоже квадратом
 
 
+index = 1  # часть тела змеи, которую мы проверяем на необходимость поворачивать
 play = True
 while play:
-    for x in event.get():
-        if x.type == QUIT:
+    for e in event.get():
+        if e.type == QUIT:
             play = False
 
     # выход за пределы экрана
@@ -104,7 +117,9 @@ while play:
             or snake[0].x - snake[0].length // 2 < 0 or snake[0].y - snake[0].width // 2 < 0:
         play = False
 
-    chg_drct()
+    chg_drct()  # 1) return True + if chg_drct(): 2) snake[0].direction == snake[1].direction
+    index += move_body_snake(index)
+    index = 1 if index > len(snake) - 1 else index
 
     if food.side / 2 + food.x > snake[0].x > food.x - food.side / 2 and food.side / 2 + food.y > snake[0].y > food.y - food.side / 2:
         food = Food(SNAKE_LENGTH, "apple")
@@ -112,8 +127,11 @@ while play:
 
     draw.rect(screen, (11, 102, 35), LAND)
     food.appearance()
-    for i in range(len(snake)):
-        snake[i].appearance()
+    for i in range(len(snake)):  # рисуем и двигаем каждый элемент из списка (каждую часть тела змеи)
         snake[i].move()
+        snake[i].appearance()
+
     display.update()
     clock.tick(75)
+
+display.quit()
