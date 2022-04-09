@@ -75,16 +75,11 @@ class BodySnake:  # Класс ,,Змея'' # создаем класс BodySnak
             self.x -= SPEED
 
 
-# конкретная часть тела змеи - snake[i], i > 0, snake[i].increase_reset += что-то, increase_reset >= min_distance
-# увеличиваем i на 1 - return 0|1
-def move_body_snake(_i: int) -> int:
+def move_body_snake():
     """Поворачиваем тело змеи, кроме головы"""
-    if snake[_i].increase_reset >= snake[_i].min_distance_to_rotate:
-        snake[_i].direction = snake[_i - 1].direction
-        snake[_i].increase_reset = 0
-        return 1  # Если повернули - переходим к повороту следующей части тела змеи
-    snake[_i].increase_reset += snake[_i].speed
-    return 0  # Если не повернули - остаемся на проверке этой же частой
+    global snake
+    for i in range(1,len(snake)):
+
 
 
 # голова змеи
@@ -105,7 +100,6 @@ def grow():
         snake[-1].length *= 2  # увеличиваем длину, чтобы хвост стал тоже квадратом
 
 
-index = 1  # часть тела змеи, которую мы проверяем на необходимость поворачивать
 play = True
 while play:
     for e in event.get():
@@ -117,9 +111,8 @@ while play:
             or snake[0].x - snake[0].length // 2 < 0 or snake[0].y - snake[0].width // 2 < 0:
         play = False
 
-    chg_drct()  # 1) return True + if chg_drct(): 2) snake[0].direction == snake[1].direction
-    index += move_body_snake(index)
-    index = 1 if index > len(snake) - 1 else index
+    chg_drct()  # snake[0].direction == snake[1].direction
+    move_body_snake()
 
     if food.side / 2 + food.x > snake[0].x > food.x - food.side / 2 and food.side / 2 + food.y > snake[0].y > food.y - food.side / 2:
         food = Food(SNAKE_LENGTH, "apple")

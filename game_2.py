@@ -1,6 +1,4 @@
-import asyncio
 from random import randint as rnd
-from time import sleep
 
 
 def game_1():  # создаём функцию для первой игры (game_1)
@@ -31,12 +29,6 @@ def game_2():  # создаём функцию для второй игры (gam
             break  # заканчиваем цикл
 
 
-async def promotion():
-    print("hgdf")
-    sleep(20)
-    await promotion()
-
-
 def menu():
     while True:  # условие
         print(
@@ -53,5 +45,4 @@ def menu():
 
 
 if __name__ == "__main__":
-    asyncio.run(promotion())
     menu()

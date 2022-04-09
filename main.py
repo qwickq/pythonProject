@@ -1,13 +1,32 @@
+from threading import Event, Thread
 
 
+def a(a_: int, main_event: Event, change_event: Event):
+    for i in range(10):
+        main_event.wait()
+        main_event.clear()
+        print(a_)
+        change_event.set()
 
 
+def b(b_: int, main_event: Event, change_event: Event):
+    for i in range(10):
+        main_event.wait()
+        main_event.clear()
+        print(b_)
+        change_event.set()
 
 
+event1 = Event()
+event2 = Event()
 
+thread1 = Thread(target=a, args=(1, event1, event2))
+thread2 = Thread(target=b, args=(2, event2, event1))
 
+thread1.start()
+thread2.start()
 
-
+event1.set()
 
 
 """
@@ -42,3 +61,20 @@ for i in range(1, 11):
 
 a = list(i for i in range(1, 11))
 """
+
+
+class A:
+    def __init__(self):
+        self.a = 5
+        self.b = 6
+
+    def c(self):
+        self.a += 1
+        self.b += 2
+
+
+a = A()
+a.b = "Vasya"
+
+f = A()
+f.b = "Petya"
