@@ -73,8 +73,8 @@ class A:
         self.b += 2
 
 
-a = A()
-a.b = "Vasya"
+# a = A()
+# a.b = "Vasya"
 
 f = A()
 f.b = "Petya"

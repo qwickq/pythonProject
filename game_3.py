@@ -78,8 +78,9 @@ class BodySnake:  # Класс ,,Змея'' # создаем класс BodySnak
 def move_body_snake():
     """Поворачиваем тело змеи, кроме головы"""
     global snake
-    for i in range(1,len(snake)):
-
+    for index in range(1, len(snake)):
+        if snake[index].x == snake[index - 1].x or snake[index].y == snake[index - 1].y:
+            snake[index].direction = snake[index - 1].direction
 
 
 # голова змеи
@@ -111,7 +112,9 @@ while play:
             or snake[0].x - snake[0].length // 2 < 0 or snake[0].y - snake[0].width // 2 < 0:
         play = False
 
-    chg_drct()  # snake[0].direction == snake[1].direction
+    chg_drct()
+    snake[0].move()
+
     move_body_snake()
 
     if food.side / 2 + food.x > snake[0].x > food.x - food.side / 2 and food.side / 2 + food.y > snake[0].y > food.y - food.side / 2:
@@ -120,7 +123,9 @@ while play:
 
     draw.rect(screen, (11, 102, 35), LAND)
     food.appearance()
-    for i in range(len(snake)):  # рисуем и двигаем каждый элемент из списка (каждую часть тела змеи)
+
+    snake[0].appearance()
+    for i in range(1, len(snake)):  # рисуем и двигаем каждый элемент из списка (каждую часть тела змеи)
         snake[i].move()
         snake[i].appearance()
 
