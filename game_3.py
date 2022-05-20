@@ -22,8 +22,8 @@ class Food:  # создаём класс ,,Food" для внутриигрово
 
     def __init__(self, side, food_type):
         self.side = side
-        self.x = rnd(0, 1500)
-        self.y = rnd(0, 1000)
+        self.x = rnd(50, 1400)
+        self.y = rnd(50, 900)
         self.type = food_type
 
     def appearance(self):
@@ -54,14 +54,13 @@ def chg_drct() -> None:
             snake[0].direction = 'a'  # left
             snake[0].increase_reset = 0
 
-    snake[0].increase_reset += snake[0].speed  # увеличение пройденого расстояния после поворота у ГОЛОВЫ змеи
+    snake[0].increase_reset += SPEED_HORIZONTAL  # увеличение пройденого расстояния после поворота у ГОЛОВЫ змеи
 
 
 class BodySnake:  # Класс ,,Змея'' # создаем класс BodySnake - тело змеи
-    def __init__(self, length, width, speed, x, y):
+    def __init__(self, length, width, x, y):
         self.length = length
         self.width = width
-        self.speed = speed
         self.x = x
         self.y = y
         self.increase_reset = 0  # увеличивается пока не поворачиваем // актуальное пройденное расстояние после поворота
@@ -73,13 +72,13 @@ class BodySnake:  # Класс ,,Змея'' # создаем класс BodySnak
 
     def move(self):  # Создаём функцию ,,move'' для движении змеи
         if self.direction == 'w':
-            self.y -= SPEED
+            self.y -= SPEED_VERTICAL
         if self.direction == 's':
-            self.y += SPEED
+            self.y += SPEED_VERTICAL
         if self.direction == 'd':
-            self.x += SPEED
+            self.x += SPEED_HORIZONTAL
         if self.direction == 'a':
-            self.x -= SPEED
+            self.x -= SPEED_HORIZONTAL
 
 
 def move_body_snake():
@@ -92,11 +91,11 @@ def move_body_snake():
 
 
 # голова змеи
-head_snake = BodySnake(SNAKE_LENGTH, SNAKE_WIDTH, SPEED, rnd(4 * SNAKE_LENGTH, int(SCREEN_LENGTH * 0.90)),
+head_snake = BodySnake(SNAKE_LENGTH, SNAKE_WIDTH, rnd(4 * SNAKE_LENGTH, int(SCREEN_LENGTH * 0.90)),
                        rnd(SNAKE_WIDTH // 2, SCREEN_WIDTH - SNAKE_WIDTH))
 
-snake = [head_snake, BodySnake(SNAKE_LENGTH, SNAKE_WIDTH, SPEED, head_snake.x - SNAKE_LENGTH, head_snake.y),
-         BodySnake(SNAKE_LENGTH, SNAKE_WIDTH, SPEED, head_snake.x - SNAKE_LENGTH * 2, head_snake.y)]
+snake = [head_snake, BodySnake(SNAKE_LENGTH, SNAKE_WIDTH, head_snake.x - SNAKE_LENGTH, head_snake.y),
+         BodySnake(SNAKE_LENGTH, SNAKE_WIDTH, head_snake.x - SNAKE_LENGTH * 2, head_snake.y)]
 
 
 def grow():
@@ -104,13 +103,13 @@ def grow():
     if snake[-1].length == SNAKE_LENGTH:  # Если хвост змейки - квадрат
         # добавляем новый полуквадрат (вырастит после следующего поедания пищи)
         if snake[-1].direction == 'd':
-            snake.append(BodySnake(SNAKE_LENGTH / 2, SNAKE_WIDTH, SPEED, snake[-1].x - snake[-1].length, snake[-1].y))
+            snake.append(BodySnake(SNAKE_LENGTH / 2, SNAKE_WIDTH, snake[-1].x - snake[-1].length, snake[-1].y))
         elif snake[-1].direction == 'a':
-            snake.append(BodySnake(SNAKE_LENGTH / 2, SNAKE_WIDTH, SPEED, snake[-1].x + snake[-1].length, snake[-1].y))
+            snake.append(BodySnake(SNAKE_LENGTH / 2, SNAKE_WIDTH, snake[-1].x + snake[-1].length, snake[-1].y))
         elif snake[-1].direction == 'w':
-            snake.append(BodySnake(SNAKE_LENGTH / 2, SNAKE_WIDTH, SPEED, snake[-1].x, snake[-1].y + snake[-1].width))
+            snake.append(BodySnake(SNAKE_LENGTH / 2, SNAKE_WIDTH, snake[-1].x, snake[-1].y + snake[-1].width))
         else:
-            snake.append(BodySnake(SNAKE_LENGTH / 2, SNAKE_WIDTH, SPEED, snake[-1].x, snake[-1].y - snake[-1].width))
+            snake.append(BodySnake(SNAKE_LENGTH / 2, SNAKE_WIDTH, snake[-1].x, snake[-1].y - snake[-1].width))
     else:  # если хвост змейки - полуквадрат
         snake[-1].length *= 2  # увеличиваем длину, чтобы хвост стал тоже квадратом
 
@@ -125,6 +124,12 @@ while play:
     if snake[0].x + snake[0].length // 2 > SCREEN_LENGTH or snake[0].y + snake[0].width // 2 > SCREEN_WIDTH \
             or snake[0].x - snake[0].length // 2 < 0 or snake[0].y - snake[0].width // 2 < 0:
         play = False
+
+    head, bodies = snake[0], snake[2:]
+    for body in bodies:
+        if body.x < hфффead.x < body.x + body.length and body.y < head.y < body.y + body.width:
+            play = False
+            break
 
     chg_drct()
     snake[0].move()
