@@ -1,5 +1,5 @@
 from pygame import *
-from random import randint as rnd
+from random import randint as rnd, choice
 
 # Константы для игры
 SCREEN_LENGTH = 1920  # Длина экрана
@@ -25,11 +25,10 @@ class Food:  # создаём класс ,,Food" для внутриигрово
         self.x = rnd(50, 1400)
         self.y = rnd(50, 900)
         self.type = food_type
+        self.img = transform.scale(image.load(choice(["IMG_3854.jpg", "IMG_3855.jpg"])), (self.side, self.side))
 
     def appearance(self):
-        # img = image.load("IMG_3854.jpg").convert()
-        # rectangle = img.get_rect()
-        draw.rect(screen, [10, 10, 10], Rect(self.x, self.y, self.side, self.side))
+        screen.blit(self.img, (self.x, self.y))
 
 
 food = Food(SNAKE_WIDTH, "ewg")
@@ -122,12 +121,15 @@ while play:
 
     # выход за пределы экрана
     if snake[0].x + snake[0].length // 2 > SCREEN_LENGTH or snake[0].y + snake[0].width // 2 > SCREEN_WIDTH \
-            or snake[0].x - snake[0].length // 2 < 0 or snake[0].y - snake[0].width // 2 < 0:
+            or snake[0].x - snake[0].length // 2 < 0 or snake[0].y - snake[0].width // 2 < 0:ы
         play = False
 
     head, bodies = snake[0], snake[2:]
     for body in bodies:
-        if body.x < hфффead.x < body.x + body.length and body.y < head.y < body.y + body.width:
+        if body.x < head.x < body.x + body.length and body.y < head.y < body.y + body.width or \
+           body.x < head.x + head.length < body.x + body.length and body.y < head.y < body.y + body.width or \
+           body.x < head.x < body.x + body.length and body.y < head.y + head.width < body.y + body.width or \
+           body.x < head.x + head.length < body.x + body.length and body.y < head.y + head.width < body.y + body.width:
             play = False
             break
 
